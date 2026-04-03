@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星露谷资源管理器</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 欢迎 / 输入昵称 Modal（首次打开时显示） -->
+  <div class="modal-overlay" id="welcomeModal">
+    <div class="modal" style="text-align:center;">
+      <h2 style="justify-content:center;">欢迎来到星露谷资源管理器</h2>
+      <p style="color:var(--text-light);margin-bottom:16px;">输入你的昵称，队友就能看到是谁创建了项目</p>
+      <div class="form-group">
+        <input type="text" class="form-control" id="welcomeName" placeholder="你的昵称"
+          style="text-align:center;font-size:16px;" onkeydown="if(event.key==='Enter')app.saveNickname()">
+      </div>
+      <button class="btn btn-primary" onclick="app.saveNickname()" style="width:100%;justify-content:center;">进入</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1>星露谷资源管理器</h1>
+      <div class="subtitle">团队资源协作工具</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:13px;opacity:0.8;cursor:pointer;" onclick="app.changeNickname()" id="nicknameDisplay"></span>
+      <button class="sync-status" onclick="app.manualSync()" title="点击同步">
+        <span class="sync-dot" id="syncDot"></span>
+        <span id="syncText">本地模式</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="projects">项目</button>
+    <button class="tab" data-tab="inventory">库存</button>
+    <button class="tab" data-tab="dashboard">总览</button>
+    <button class="tab" data-tab="settings">设置</button>
+  </div>
+
+  <!-- Content -->
+  <div class="main">
+
+    <!-- ======== 项目 Tab ======== -->
+    <div class="tab-content active" id="tab-projects">
+      <div class="section-header">
+        <span class="section-title">活跃项目</span>
+        <button class="btn btn-primary" onclick="app.openNewProject()">+ 新建项目</button>
+      </div>
+      <div id="projectList"></div>
+      <div class="completed-toggle" onclick="app.toggleCompleted()">
+        <span id="completedArrow">&#9654;</span>
+        <span>已完成项目 (<span id="completedCount">0</span>)</span>
+      </div>
+      <div id="completedList" style="display:none"></div>
+    </div>
+
+    <!-- ======== 库存 Tab ======== -->
+    <div class="tab-content" id="tab-inventory">
+      <div class="section-header">
+        <span class="section-title">团队库存</span>
+        <button class="btn btn-primary" onclick="app.openAddResource()">+ 添加资源</button>
+      </div>
+      <div class="search-bar">
+        <input type="text" placeholder="搜索资源..." id="invSearch" oninput="app.renderInventory()">
+      </div>
+      <div id="inventoryList"></div>
+    </div>
+
+    <!-- ======== 总览 Tab ======== -->
+    <div class="tab-content" id="tab-dashboard">
+      <div class="section-header">
+        <span class="section-title">资源缺口总览</span>
+      </div>
+      <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;">
+        对比所有活跃项目的资源需求与当前库存
+      </p>
+      <div id="dashboardList"></div>
+    </div>
+
+    <!-- ======== 设置 Tab ======== -->
+    <div class="tab-content" id="tab-settings">
+      <div class="section-title" style="margin-bottom:20px;">设置</div>
+
+      <div class="card">
+        <div class="settings-section">
+          <h3>我的昵称</h3>
+          <div class="form-row" style="margin-bottom:0;">
+            <div class="form-group" style="margin-bottom:0">
+              <input type="text" class="form-control" id="settingsNickname" placeholder="你的昵称">
+            </div>
+            <button class="btn btn-primary" onclick="app.updateNickname()">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="settings-section">
+          <h3>团队成员</h3>
+          <p class="settings-info">成员会在你或队友输入昵称时自动添加，也可以手动管理</p>
+          <div class="form-row" style="margin-bottom:8px;">
+            <div class="form-group" style="margin-bottom:0">
+              <input type="text" class="form-control" id="newMember" placeholder="成员名称">
+            </div>
+            <button class="btn btn-primary" onclick="app.addMember()">添加</button>
+          </div>
+          <div id="memberList" style="margin-top:8px;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="settings-section">
+          <h3>团队邀请链接</h3>
+          <div id="inviteLinkSection">
+            <p class="settings-info" id="inviteLinkInfo">配置 GitHub 同步后，可以生成邀请链接发给队友。队友点开链接输入昵称即可使用，无需 GitHub 账号。</p>
+            <div id="inviteLinkActions"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="settings-section">
+          <h3>管理员: GitHub 同步配置</h3>
+          <p class="settings-info">
+            只需一个人配置即可。需要一个 GitHub 公有仓库和 Personal Access Token (fine-grained, 只需 Contents 读写权限)。
+            <br>配置完成后生成邀请链接发给队友，队友不需要 GitHub 账号。
+          </p>
+          <div class="form-group">
+            <label>仓库 (owner/repo)</label>
+            <input type="text" class="form-control" id="ghRepo" placeholder="例: myteam/stardew-resources">
+          </div>
+          <div class="form-group">
+            <label>分支</label>
+            <input type="text" class="form-control" id="ghBranch" placeholder="main" value="main">
+          </div>
+          <div class="form-group">
+            <label>Personal Access Token</label>
+            <input type="password" class="form-control" id="ghToken" placeholder="github_pat_xxxxxxxxxxxx">
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="app.saveGitHubConfig()">保存配置</button>
+            <button class="btn" onclick="app.testGitHubConnection()">测试连接</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="settings-section">
+          <h3>数据导入/导出</h3>
+          <p class="settings-info">手动导入导出 JSON 数据，也可以通过聊天工具分享给队友</p>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" onclick="app.exportData()">导出数据</button>
+            <button class="btn" onclick="document.getElementById('importFile').click()">导入数据</button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="app.importData(event)">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="settings-section">
+          <h3>危险操作</h3>
+          <button class="btn btn-danger" onclick="app.clearAllData()">清空所有数据</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== 新建项目 Modal ======== -->
+  <div class="modal-overlay" id="projectModal">
+    <div class="modal">
+      <h2>新建项目</h2>
+      <div class="form-group">
+        <label>负责人</label>
+        <select class="form-control" id="projCreator">
+          <option value="">选择成员...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>目标物品</label>
+        <div class="autocomplete-wrap">
+          <input type="text" class="form-control" id="projItem"
+            placeholder="输入物品名搜索..." autocomplete="off"
+            oninput="app.onItemSearch(this.value)"
+            onfocus="app.onItemSearch(this.value)">
+          <div class="autocomplete-list" id="itemDropdown"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>数量</label>
+        <input type="number" class="form-control" id="projQty" value="1" min="1">
+      </div>
+      <div id="ingredientPreview"></div>
+      <div class="form-group" style="margin-top:12px;">
+        <label>备注（可选）</label>
+        <input type="text" class="form-control" id="projNote" placeholder="例: 给温室用">
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="app.closeModal('projectModal')">取消</button>
+        <button class="btn btn-primary" onclick="app.createProject()">创建项目</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== 添加资源 Modal ======== -->
+  <div class="modal-overlay" id="resourceModal">
+    <div class="modal">
+      <h2>添加资源到库存</h2>
+      <div class="form-group">
+        <label>资源名称</label>
+        <div class="autocomplete-wrap">
+          <input type="text" class="form-control" id="resName"
+            placeholder="输入资源名..." autocomplete="off"
+            oninput="app.onResourceSearch(this.value)"
+            onfocus="app.onResourceSearch(this.value)">
+          <div class="autocomplete-list" id="resDropdown"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>数量</label>
+        <input type="number" class="form-control" id="resQty" value="1" min="1">
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="app.closeModal('resourceModal')">取消</button>
+        <button class="btn btn-primary" onclick="app.addResource()">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== 自定义项目 Modal ======== -->
+  <div class="modal-overlay" id="customProjectModal">
+    <div class="modal">
+      <h2>自定义项目</h2>
+      <div class="form-group">
+        <label>项目名称</label>
+        <input type="text" class="form-control" id="customProjName" placeholder="例: 收集100个木材">
+      </div>
+      <div class="form-group">
+        <label>负责人</label>
+        <select class="form-control" id="customProjCreator">
+          <option value="">选择成员...</option>
+        </select>
+      </div>
+      <div id="customIngredients">
+        <label style="font-size:13px;font-weight:500;color:var(--text-light);margin-bottom:8px;display:block;">所需资源</label>
+      </div>
+      <button class="btn btn-sm" onclick="app.addCustomIngredient()" style="margin-top:8px;">+ 添加资源</button>
+      <div class="form-group" style="margin-top:12px;">
+        <label>备注（可选）</label>
+        <input type="text" class="form-control" id="customProjNote" placeholder="">
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="app.closeModal('customProjectModal')">取消</button>
+        <button class="btn btn-primary" onclick="app.createCustomProject()">创建项目</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/recipes.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
