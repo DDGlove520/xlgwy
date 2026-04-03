@@ -1,6 +1,21 @@
 {
   "projects": [
     {
+      "id": "mnimr3rlb31i8",
+      "name": "Ã°ÂÂÂ¥ Ã§ÂÂÃ§ÂÂ",
+      "creator": "",
+      "targetItem": "Ã§ÂÂÃ§ÂÂ",
+      "quantity": 3,
+      "ingredients": {
+        "Ã©ÂÂÃ§ÂÂ¿Ã§ÂÂ³": 60,
+        "Ã§ÂÂ³Ã¥Â¤Â´": 75
+      },
+      "note": "",
+      "status": "completed",
+      "createdAt": 1775204211153,
+      "completedAt": 1775204228155
+    },
+    {
       "id": "mniompw9qmh5k",
       "name": "🍺 酒桶",
       "creator": "END",
@@ -37,5 +52,5 @@
     "END",
     "lhn"
   ],
-  "_lastModified": 1775209817783
+  "_lastModified": 1775209835994
 }
