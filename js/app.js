@@ -813,67 +813,74 @@ const app = {
     }
   },
 
+  // _fileSha: 缓存远程文件 SHA，避免每次写入前都要读
+  // _syncing: 防止并发同步
+  _fileSha: null,
+  _syncing: false,
+
   async syncToGitHub() {
-    if (!this.github) return;
+    if (!this.github || this._syncing) return;
+    this._syncing = true;
     this.updateSyncStatus('syncing', '同步中...');
 
     try {
-      await this.ghWriteFile('data.json', JSON.stringify(this.data, null, 2));
+      // 给数据打上时间戳
+      this.data._lastModified = Date.now();
+      this.saveLocal();
+
+      const content = JSON.stringify(this.data, null, 2);
+      await this.ghWriteFile('data.json', content);
       this.updateSyncStatus('connected', '已同步 ' + new Date().toLocaleTimeString('zh-CN'));
     } catch (e) {
       console.error('同步失败', e);
-      this.updateSyncStatus('offline', '同步失败');
+      // SHA 过期导致 409 冲突，清除缓存重试一次
+      if (e.message && e.message.includes('409')) {
+        this._fileSha = null;
+        try {
+          await this.ghWriteFile('data.json', JSON.stringify(this.data, null, 2));
+          this.updateSyncStatus('connected', '已同步 ' + new Date().toLocaleTimeString('zh-CN'));
+        } catch (e2) {
+          this.updateSyncStatus('offline', '同步失败');
+        }
+      } else {
+        this.updateSyncStatus('offline', '同步失败');
+      }
+    } finally {
+      this._syncing = false;
     }
   },
 
   async syncFromGitHub() {
-    if (!this.github) return;
+    if (!this.github || this._syncing) return;
+    this._syncing = true;
     this.updateSyncStatus('syncing', '拉取中...');
 
     try {
-      const content = await this.ghReadFile('data.json');
-      if (content) {
-        const remote = JSON.parse(content);
-        // 合并: 取最新的项目列表，合并库存（取较大值），合并成员
-        this.mergeData(remote);
-        this.saveLocal();
-        this.renderAll();
+      const result = await this.ghReadFile('data.json');
+      if (result) {
+        const remote = JSON.parse(result);
+        const remoteTime = remote._lastModified || 0;
+        const localTime = this.data._lastModified || 0;
+
+        // 远程更新则用远程数据覆盖本地（最后写入者胜）
+        if (remoteTime > localTime) {
+          this.data = remote;
+          this.saveLocal();
+          this.renderAll();
+        }
         this.updateSyncStatus('connected', '已同步 ' + new Date().toLocaleTimeString('zh-CN'));
       } else {
-        // 远程无数据，推送本地数据
+        // 远程无数据，推送本地
+        this._syncing = false;
         await this.syncToGitHub();
+        return;
       }
     } catch (e) {
       console.error('拉取失败', e);
       this.updateSyncStatus('offline', '拉取失败');
+    } finally {
+      this._syncing = false;
     }
-  },
-
-  mergeData(remote) {
-    // 合并项目: 以 id 为主键，取更新时间较新的
-    const projectMap = {};
-    for (const p of this.data.projects) projectMap[p.id] = p;
-    for (const p of remote.projects || []) {
-      const existing = projectMap[p.id];
-      if (!existing) {
-        projectMap[p.id] = p;
-      } else {
-        // 取最新变更
-        const localTime = existing.completedAt || existing.createdAt;
-        const remoteTime = p.completedAt || p.createdAt;
-        if (remoteTime > localTime) projectMap[p.id] = p;
-      }
-    }
-    this.data.projects = Object.values(projectMap);
-
-    // 合并库存: 取较大值（保守合并）
-    for (const [name, qty] of Object.entries(remote.inventory || {})) {
-      this.data.inventory[name] = Math.max(this.data.inventory[name] || 0, qty);
-    }
-
-    // 合并成员
-    const memberSet = new Set([...this.data.members, ...(remote.members || [])]);
-    this.data.members = Array.from(memberSet);
   },
 
   async manualSync() {
@@ -881,6 +888,7 @@ const app = {
       this.toast('请先在设置中配置 GitHub 同步');
       return;
     }
+    // 先拉取远程，再推送本地
     await this.syncFromGitHub();
     await this.syncToGitHub();
     this.toast('同步完成');
@@ -888,10 +896,13 @@ const app = {
 
   startAutoSync() {
     if (this._syncTimer) clearInterval(this._syncTimer);
-    // 每 30 秒自动同步
-    this._syncTimer = setInterval(() => this.syncToGitHub(), 30000);
     // 立即拉取一次
     this.syncFromGitHub();
+    // 每 60 秒双向同步（拉取 + 推送），降低 API 频率
+    this._syncTimer = setInterval(async () => {
+      await this.syncFromGitHub();
+      await this.syncToGitHub();
+    }, 60000);
   },
 
   // ---- GitHub API helpers ----
@@ -904,30 +915,40 @@ const app = {
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
     const data = await res.json();
-    return atob(data.content);
+    // 缓存 SHA
+    this._fileSha = data.sha;
+    // 正确解码中文: base64 → bytes → UTF-8
+    const bytes = Uint8Array.from(atob(data.content.replace(/\n/g, '')), c => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
   },
 
   async ghWriteFile(path, content) {
     const { repo, branch, token } = this.github;
-    // 先获取 sha
-    let sha = null;
-    try {
-      const getRes = await fetch(
-        `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`,
-        { headers: { 'Authorization': `token ${token}` } }
-      );
-      if (getRes.ok) {
-        const getData = await getRes.json();
-        sha = getData.sha;
-      }
-    } catch (e) {}
+
+    // 如果没有缓存 SHA，先获取
+    if (!this._fileSha) {
+      try {
+        const getRes = await fetch(
+          `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`,
+          { headers: { 'Authorization': `token ${token}` } }
+        );
+        if (getRes.ok) {
+          const getData = await getRes.json();
+          this._fileSha = getData.sha;
+        }
+      } catch (e) {}
+    }
+
+    // 编码中文: UTF-8 → bytes → base64
+    const bytes = new TextEncoder().encode(content);
+    const base64 = btoa(String.fromCharCode(...bytes));
 
     const body = {
-      message: `update data ${new Date().toISOString()}`,
-      content: btoa(unescape(encodeURIComponent(content))),
+      message: `update ${new Date().toISOString()}`,
+      content: base64,
       branch: branch
     };
-    if (sha) body.sha = sha;
+    if (this._fileSha) body.sha = this._fileSha;
 
     const res = await fetch(
       `https://api.github.com/repos/${repo}/contents/${path}`,
@@ -942,8 +963,11 @@ const app = {
     );
     if (!res.ok) {
       const data = await res.json();
-      throw new Error(data.message || `HTTP ${res.status}`);
+      throw new Error(`${res.status}: ${data.message || 'unknown'}`);
     }
+    // 更新缓存 SHA
+    const result = await res.json();
+    this._fileSha = result.content.sha;
   },
 
   updateSyncStatus(state, text) {
@@ -976,10 +1000,10 @@ const app = {
       try {
         const imported = JSON.parse(e.target.result);
         if (imported.projects && imported.inventory) {
-          this.mergeData(imported);
+          this.data = imported;
           this.save();
           this.renderAll();
-          this.toast('数据已导入并合并');
+          this.toast('数据已导入');
         } else {
           this.toast('无效的数据文件');
         }
