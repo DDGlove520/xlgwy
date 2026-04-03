@@ -1,8 +1,56 @@
 {
-  "projects": [],
+  "projects": [
+    {
+      "id": "mnimr3rlb31i8",
+      "name": "Ã°ÂÂÂ¥ Ã§ÂÂÃ§ÂÂ",
+      "creator": "",
+      "targetItem": "Ã§ÂÂÃ§ÂÂ",
+      "quantity": 3,
+      "ingredients": {
+        "Ã©ÂÂÃ§ÂÂ¿Ã§ÂÂ³": 60,
+        "Ã§ÂÂ³Ã¥Â¤Â´": 75
+      },
+      "note": "",
+      "status": "completed",
+      "createdAt": 1775204211153,
+      "completedAt": 1775204228155
+    },
+    {
+      "id": "mniompw9qmh5k",
+      "name": "🍺 酒桶",
+      "creator": "END",
+      "targetItem": "酒桶",
+      "quantity": 50,
+      "ingredients": {
+        "木材": 1500,
+        "铜锭": 50,
+        "铁锭": 50,
+        "橡树树脂": 50
+      },
+      "note": "",
+      "status": "active",
+      "createdAt": 1775207365785,
+      "completedAt": null
+    },
+    {
+      "id": "mnipslf8evcen",
+      "name": "📦 木箱",
+      "creator": "lhn",
+      "targetItem": "木箱",
+      "quantity": 1,
+      "ingredients": {
+        "木材": 50
+      },
+      "note": "11",
+      "status": "active",
+      "createdAt": 1775209319540,
+      "completedAt": null
+    }
+  ],
   "inventory": {},
   "members": [
-    "海洋"
+    "END",
+    "lhn"
   ],
-  "_lastModified": 1775209757768
+  "_lastModified": 1775209775001
 }
