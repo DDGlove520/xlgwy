@@ -27,17 +27,18 @@
         "木材": 50
       },
       "note": "11",
-      "status": "active",
+      "status": "completed",
       "createdAt": 1775209319540,
-      "completedAt": null
+      "completedAt": 1775210576353
     }
   ],
   "inventory": {
-    "木材": 1000
+    "木材": 1000,
+    "松露油": 10
   },
   "members": [
     "END",
     "lhn"
   ],
-  "_lastModified": 1775210599164
+  "_lastModified": 1775210614142
 }
