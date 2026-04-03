@@ -1,43 +1,48 @@
 {
   "projects": [
     {
-      "id": "mniompw9qmh5k",
-      "name": "🍺 酒桶",
-      "creator": "END",
-      "targetItem": "酒桶",
-      "quantity": 50,
+      "id": "mnimr3rlb31i8",
+      "name": "🔥 熔炉",
+      "creator": "",
+      "targetItem": "熔炉",
+      "quantity": 3,
       "ingredients": {
-        "木材": 1500,
-        "铜锭": 50,
-        "铁锭": 50,
-        "橡树树脂": 50
+        "铜矿石": 60,
+        "石头": 75
       },
       "note": "",
-      "status": "active",
-      "createdAt": 1775207365785,
-      "completedAt": null
+      "status": "completed",
+      "createdAt": 1775204211153,
+      "completedAt": 1775204228155
     },
     {
-      "id": "mnipslf8evcen",
+      "id": "mnimt6mkbzrf4",
       "name": "📦 木箱",
-      "creator": "lhn",
+      "creator": "嘻嘻",
       "targetItem": "木箱",
       "quantity": 1,
       "ingredients": {
         "木材": 50
       },
-      "note": "11",
+      "note": "",
       "status": "active",
-      "createdAt": 1775209319540,
+      "createdAt": 1775204308172,
       "completedAt": null
     }
   ],
   "inventory": {
-    "木材": 1000
+    "橡树树脂": 2,
+    "木材": 12,
+    "石头": 100,
+    "æ©¡æ æ è": 2,
+    "æ¨æ": 12,
+    "ç³å¤´": 100
   },
   "members": [
+    "嘻嘻",
+    "哈哈",
     "END",
-    "lhn"
-  ],
-  "_lastModified": 1775210784209
+    "å»å»",
+    "åå"
+  ]
 }
