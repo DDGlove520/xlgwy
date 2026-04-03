@@ -1,0 +1,48 @@
+{
+  "projects": [
+    {
+      "id": "mnimr3rlb31i8",
+      "name": "🔥 熔炉",
+      "creator": "",
+      "targetItem": "熔炉",
+      "quantity": 3,
+      "ingredients": {
+        "铜矿石": 60,
+        "石头": 75
+      },
+      "note": "",
+      "status": "completed",
+      "createdAt": 1775204211153,
+      "completedAt": 1775204228155
+    },
+    {
+      "id": "mnimt6mkbzrf4",
+      "name": "📦 木箱",
+      "creator": "嘻嘻",
+      "targetItem": "木箱",
+      "quantity": 1,
+      "ingredients": {
+        "木材": 50
+      },
+      "note": "",
+      "status": "active",
+      "createdAt": 1775204308172,
+      "completedAt": null
+    }
+  ],
+  "inventory": {
+    "橡树树脂": 2,
+    "木材": 12,
+    "石头": 100,
+    "æ©¡æ æ è": 2,
+    "æ¨æ": 12,
+    "ç³å¤´": 100
+  },
+  "members": [
+    "嘻嘻",
+    "哈哈",
+    "END",
+    "å»å»",
+    "åå"
+  ]
+}
