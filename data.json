@@ -16,20 +16,6 @@
       "status": "active",
       "createdAt": 1775207365785,
       "completedAt": null
-    },
-    {
-      "id": "mnipslf8evcen",
-      "name": "📦 木箱",
-      "creator": "lhn",
-      "targetItem": "木箱",
-      "quantity": 1,
-      "ingredients": {
-        "木材": 50
-      },
-      "note": "11",
-      "status": "active",
-      "createdAt": 1775209319540,
-      "completedAt": null
     }
   ],
   "inventory": {
@@ -39,5 +25,5 @@
     "END",
     "lhn"
   ],
-  "_lastModified": 1775211139647
+  "_lastModified": 1775541046618
 }
