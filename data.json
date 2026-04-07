@@ -33,12 +33,10 @@
       "completedAt": null
     }
   ],
-  "inventory": {
-    "木材": 1000
-  },
+  "inventory": {},
   "members": [
     "END",
     "lhn"
   ],
-  "_lastModified": 1775541081920
+  "_lastModified": 1775541088692
 }
