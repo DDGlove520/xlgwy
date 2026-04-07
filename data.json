@@ -16,6 +16,21 @@
       "status": "active",
       "createdAt": 1775207365785,
       "completedAt": null
+    },
+    {
+      "id": "mno7bclabprt2",
+      "name": "🌳 树液采集器",
+      "creator": "END",
+      "targetItem": "树液采集器",
+      "quantity": 20,
+      "ingredients": {
+        "木材": 800,
+        "铜锭": 40
+      },
+      "note": "",
+      "status": "active",
+      "createdAt": 1775541078910,
+      "completedAt": null
     }
   ],
   "inventory": {
@@ -25,5 +40,5 @@
     "END",
     "lhn"
   ],
-  "_lastModified": 1775541046618
+  "_lastModified": 1775541081920
 }
