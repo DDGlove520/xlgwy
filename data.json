@@ -13,9 +13,9 @@
         "橡树树脂": 50
       },
       "note": "",
-      "status": "completed",
+      "status": "active",
       "createdAt": 1775207365785,
-      "completedAt": 1775541782506
+      "completedAt": null
     },
     {
       "id": "mno7bclabprt2",
@@ -84,5 +84,5 @@
     "lhn",
     "林丹"
   ],
-  "_lastModified": 1775541877847
+  "_lastModified": 1775541908152
 }
