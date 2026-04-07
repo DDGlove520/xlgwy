@@ -31,6 +31,21 @@
       "status": "active",
       "createdAt": 1775541078910,
       "completedAt": null
+    },
+    {
+      "id": "mno7cibtv3pbg",
+      "name": "🟫 铜锭",
+      "creator": "END",
+      "targetItem": "铜锭",
+      "quantity": 50,
+      "ingredients": {
+        "铜矿石": 250,
+        "煤炭": 50
+      },
+      "note": "",
+      "status": "active",
+      "createdAt": 1775541133001,
+      "completedAt": null
     }
   ],
   "inventory": {},
@@ -38,5 +53,5 @@
     "END",
     "lhn"
   ],
-  "_lastModified": 1775541088692
+  "_lastModified": 1775541136012
 }
