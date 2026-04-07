@@ -46,6 +46,36 @@
       "status": "active",
       "createdAt": 1775541133001,
       "completedAt": null
+    },
+    {
+      "id": "mno7dkkn4bjew",
+      "name": "🟫 铜锭",
+      "creator": "END",
+      "targetItem": "铜锭",
+      "quantity": 40,
+      "ingredients": {
+        "铜矿石": 200,
+        "煤炭": 40
+      },
+      "note": "",
+      "status": "active",
+      "createdAt": 1775541182567,
+      "completedAt": null
+    },
+    {
+      "id": "mno7dukv81pzk",
+      "name": "⬜ 铁锭",
+      "creator": "END",
+      "targetItem": "铁锭",
+      "quantity": 50,
+      "ingredients": {
+        "铁矿石": 250,
+        "煤炭": 50
+      },
+      "note": "",
+      "status": "active",
+      "createdAt": 1775541195535,
+      "completedAt": null
     }
   ],
   "inventory": {},
@@ -53,5 +83,5 @@
     "END",
     "lhn"
   ],
-  "_lastModified": 1775541136012
+  "_lastModified": 1775541198539
 }
